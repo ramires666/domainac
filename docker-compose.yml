@@ -1,0 +1,9 @@
+services:
+  domain-checker:
+    build: .
+    container_name: domain-checker
+    environment:
+      - PORT=18080
+    ports:
+      - "18080:18080"
+    restart: unless-stopped
