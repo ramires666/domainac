@@ -1,7 +1,8 @@
 services:
-  domain-checker:
+  domainac:
     build: .
-    container_name: domain-checker
+    image: domainac:latest
+    container_name: domainac
     environment:
       - PORT=18080
     ports:
