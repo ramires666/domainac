@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
@@ -10,6 +11,7 @@ except ModuleNotFoundError:  # pragma: no cover
     from domain_checker import DomainCheckResult, check_domain_registration
 
 DEFAULT_STREAMABLE_HTTP_PATH = "/mcp"
+logger = logging.getLogger("domainac.mcp")
 
 
 def _result_to_payload(result: DomainCheckResult) -> dict[str, Any]:
@@ -22,6 +24,7 @@ def _result_to_payload(result: DomainCheckResult) -> dict[str, Any]:
 
 
 def _check_to_payload(domain: str) -> dict[str, Any]:
+    logger.info("Processing domain: %s", domain)
     try:
         result = check_domain_registration(domain)
     except ValueError as exc:
@@ -70,6 +73,7 @@ def create_mcp_server(
             raise ValueError("`domains` must contain at least one value")
         if len(domains) > 200:
             raise ValueError("`domains` supports up to 200 values")
+        logger.info("Processing batch request with %d domains", len(domains))
         return {"results": [_check_to_payload(domain) for domain in domains]}
 
     return server

@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import logging
+
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import BaseModel, Field
 
 from app.domain_checker import DomainCheckResult, check_domain_registration
+
+logger = logging.getLogger("domainac.http")
 
 app = FastAPI(
     title="Domain Checker API",
@@ -38,6 +42,7 @@ class BatchCheckResponse(BaseModel):
 
 
 def _check_to_response(domain: str) -> DomainCheckResponse:
+    logger.info("Processing domain: %s", domain)
     try:
         result: DomainCheckResult = check_domain_registration(domain)
     except ValueError as exc:
@@ -87,5 +92,6 @@ def check_domain(
 
 @app.post("/check/batch", response_model=BatchCheckResponse)
 def check_domains_batch(payload: BatchCheckRequest) -> BatchCheckResponse:
+    logger.info("Processing batch request with %d domains", len(payload.domains))
     results = [_check_to_response(domain) for domain in payload.domains]
     return BatchCheckResponse(results=results)
