@@ -1,7 +1,10 @@
 # domainac
 
-A simple FastAPI service to check whether a domain is registered.
-Lookup flow: `RDAP` first, then fallback to `WHOIS`.
+Domain registration checker with two interfaces:
+- HTTP API (`FastAPI`)
+- MCP server (`Model Context Protocol`)
+
+Lookup flow is the same for both: `RDAP` first, then `WHOIS` fallback.
 
 ## Run With Docker
 
@@ -9,32 +12,71 @@ Lookup flow: `RDAP` first, then fallback to `WHOIS`.
 docker compose up --build
 ```
 
-The API will be available at `http://localhost:18080`.
+After startup:
+- HTTP API: `http://localhost:18080`
+- MCP (Streamable HTTP): `http://localhost:18081/mcp`
 
-The service uses a non-standard 5-digit port `18080` and always checks if the port is free before starting.
-If the port is already in use, startup fails with an error.
+Both services use non-standard 5-digit ports and check port availability before starting.
 
-## API Documentation
+## Run Without Docker
+
+Install dependencies:
+
+```bash
+python3 -m pip install -r requirements.txt
+```
+
+Run HTTP API:
+
+```bash
+python3 -m app.run_server
+```
+
+Run MCP server (default transport is `stdio`):
+
+```bash
+python3 -m app.run_mcp_server
+```
+
+Run MCP server over HTTP (`streamable-http`):
+
+```bash
+MCP_TRANSPORT=streamable-http MCP_PORT=18081 python3 -m app.run_mcp_server
+```
+
+Example MCP client config (`stdio` transport):
+
+```json
+{
+  "mcpServers": {
+    "domainac": {
+      "command": "python3",
+      "args": ["-m", "app.run_mcp_server"]
+    }
+  }
+}
+```
+
+Example MCP client config (`streamable-http` transport):
+
+```json
+{
+  "mcpServers": {
+    "domainac": {
+      "url": "http://localhost:18081/mcp"
+    }
+  }
+}
+```
+
+## HTTP API Documentation
 
 - Swagger UI: `http://localhost:18080/swagger`
 - Swagger UI (default FastAPI URL): `http://localhost:18080/docs`
 - ReDoc: `http://localhost:18080/redoc`
 - OpenAPI JSON: `http://localhost:18080/openapi.json`
 
-## Run Without Docker
-
-```bash
-python3 -m pip install -r requirements.txt
-python3 -m app.run_server
-```
-
-By default, `PORT=18080` is used. You can override it:
-
-```bash
-PORT=19090 python3 -m app.run_server
-```
-
-## Example Requests
+## HTTP API Examples
 
 Single domain check:
 
@@ -56,7 +98,12 @@ Health-check:
 curl "http://localhost:18080/health"
 ```
 
-## Response Format
+## MCP Tools
+
+- `check_domain(domain: str)`
+- `check_domains_batch(domains: list[str])`
+
+Tool result format:
 
 ```json
 {
@@ -67,8 +114,8 @@ curl "http://localhost:18080/health"
 }
 ```
 
-`status` can be:
+`status` values:
 - `registered`
 - `unregistered`
-- `unknown` (if WHOIS returned an inconclusive response)
-- `invalid` (batch check only, when a domain is invalid)
+- `unknown` (lookup was inconclusive)
+- `invalid` (invalid domain input)

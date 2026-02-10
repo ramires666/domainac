@@ -8,3 +8,17 @@ services:
     ports:
       - "18080:18080"
     restart: unless-stopped
+
+  domainac-mcp:
+    build: .
+    image: domainac:latest
+    container_name: domainac-mcp
+    command: ["python", "-m", "app.run_mcp_server"]
+    environment:
+      - MCP_TRANSPORT=streamable-http
+      - MCP_HOST=0.0.0.0
+      - MCP_PORT=18081
+      - MCP_STREAMABLE_HTTP_PATH=/mcp
+    ports:
+      - "18081:18081"
+    restart: unless-stopped
