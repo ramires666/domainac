@@ -1,7 +1,12 @@
 services:
   domainac:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      pull: true
+      no_cache: true
     image: domainac:latest
+    pull_policy: build
     container_name: domainac
     working_dir: /opt/domainac
     environment:
@@ -11,8 +16,13 @@ services:
     restart: unless-stopped
 
   domainac-mcp:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      pull: true
+      no_cache: true
     image: domainac:latest
+    pull_policy: build
     container_name: domainac-mcp
     working_dir: /opt/domainac
     command: ["python", "/opt/domainac/app/run_mcp_server.py"]
