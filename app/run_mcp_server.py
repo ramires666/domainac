@@ -5,7 +5,10 @@ import socket
 import sys
 from typing import Literal, cast
 
-from app.mcp_server import create_mcp_server
+try:
+    from app.mcp_server import create_mcp_server
+except ModuleNotFoundError:  # pragma: no cover
+    from mcp_server import create_mcp_server
 
 DEFAULT_HOST = "0.0.0.0"
 DEFAULT_PORT = 18081

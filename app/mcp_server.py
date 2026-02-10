@@ -4,7 +4,10 @@ from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
-from app.domain_checker import DomainCheckResult, check_domain_registration
+try:
+    from app.domain_checker import DomainCheckResult, check_domain_registration
+except ModuleNotFoundError:  # pragma: no cover
+    from domain_checker import DomainCheckResult, check_domain_registration
 
 DEFAULT_STREAMABLE_HTTP_PATH = "/mcp"
 
