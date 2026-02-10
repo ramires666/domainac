@@ -3,7 +3,7 @@ services:
     build: .
     image: domainac:latest
     container_name: domainac
-    working_dir: /app
+    working_dir: /opt/domainac
     environment:
       - PORT=18080
     ports:
@@ -14,8 +14,8 @@ services:
     build: .
     image: domainac:latest
     container_name: domainac-mcp
-    working_dir: /app
-    command: ["python", "/app/app/run_mcp_server.py"]
+    working_dir: /opt/domainac
+    command: ["python", "/opt/domainac/app/run_mcp_server.py"]
     environment:
       - MCP_TRANSPORT=streamable-http
       - MCP_HOST=0.0.0.0
