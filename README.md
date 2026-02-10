@@ -1,48 +1,48 @@
 # domainac
 
-Простой сервис на FastAPI для проверки домена: зарегистрирован он или нет.
-Проверка работает по схеме: `RDAP` -> fallback `WHOIS`.
+A simple FastAPI service to check whether a domain is registered.
+Lookup flow: `RDAP` first, then fallback to `WHOIS`.
 
-## Запуск в Docker
+## Run With Docker
 
 ```bash
 docker compose up --build
 ```
 
-API будет доступен на `http://localhost:18080`.
+The API will be available at `http://localhost:18080`.
 
-Сервис использует нестандартный 5-значный порт `18080` и перед стартом всегда проверяет, что порт свободен.
-Если порт занят, запуск завершается с ошибкой.
+The service uses a non-standard 5-digit port `18080` and always checks if the port is free before starting.
+If the port is already in use, startup fails with an error.
 
-## Документация API
+## API Documentation
 
 - Swagger UI: `http://localhost:18080/swagger`
-- Swagger UI (стандартный URL FastAPI): `http://localhost:18080/docs`
+- Swagger UI (default FastAPI URL): `http://localhost:18080/docs`
 - ReDoc: `http://localhost:18080/redoc`
 - OpenAPI JSON: `http://localhost:18080/openapi.json`
 
-## Запуск без Docker
+## Run Without Docker
 
 ```bash
 python3 -m pip install -r requirements.txt
 python3 -m app.run_server
 ```
 
-По умолчанию используется `PORT=18080`. Можно переопределить:
+By default, `PORT=18080` is used. You can override it:
 
 ```bash
 PORT=19090 python3 -m app.run_server
 ```
 
-## Примеры запросов
+## Example Requests
 
-Проверка домена:
+Single domain check:
 
 ```bash
 curl "http://localhost:18080/check?domain=example.com"
 ```
 
-Массовая проверка:
+Batch domain check:
 
 ```bash
 curl -X POST "http://localhost:18080/check/batch" \
@@ -56,7 +56,7 @@ Health-check:
 curl "http://localhost:18080/health"
 ```
 
-## Формат ответа
+## Response Format
 
 ```json
 {
@@ -67,8 +67,8 @@ curl "http://localhost:18080/health"
 }
 ```
 
-`status` может быть:
+`status` can be:
 - `registered`
 - `unregistered`
-- `unknown` (если WHOIS вернул неоднозначный ответ)
-- `invalid` (только в массовой проверке, если домен невалидный)
+- `unknown` (if WHOIS returned an inconclusive response)
+- `invalid` (batch check only, when a domain is invalid)
