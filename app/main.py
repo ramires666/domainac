@@ -41,25 +41,41 @@ class BatchCheckResponse(BaseModel):
     results: list[DomainCheckResponse]
 
 
+def _emit_domain_result(response: DomainCheckResponse) -> None:
+    message = (
+        f"Processed domain={response.domain} "
+        f"status={response.status} "
+        f"registered={response.registered} "
+        f"error={response.error}"
+    )
+    logger.info(message)
+    print(f"[HTTP] {message}", flush=True)
+
+
 def _check_to_response(domain: str) -> DomainCheckResponse:
     logger.info("Processing domain: %s", domain)
+    print(f"[HTTP] Processing domain: {domain}", flush=True)
     try:
         result: DomainCheckResult = check_domain_registration(domain)
     except ValueError as exc:
         sanitized = domain.strip().lower()
-        return DomainCheckResponse(
+        response = DomainCheckResponse(
             domain=sanitized or domain,
             registered=None,
             status="invalid",
             error=str(exc),
         )
+        _emit_domain_result(response)
+        return response
 
-    return DomainCheckResponse(
+    response = DomainCheckResponse(
         domain=result.domain,
         registered=result.registered,
         status=result.status,
         error=result.error,
     )
+    _emit_domain_result(response)
+    return response
 
 
 @app.get("/", include_in_schema=False)
@@ -93,5 +109,6 @@ def check_domain(
 @app.post("/check/batch", response_model=BatchCheckResponse)
 def check_domains_batch(payload: BatchCheckRequest) -> BatchCheckResponse:
     logger.info("Processing batch request with %d domains", len(payload.domains))
+    print(f"[HTTP] Processing batch request with {len(payload.domains)} domains", flush=True)
     results = [_check_to_response(domain) for domain in payload.domains]
     return BatchCheckResponse(results=results)

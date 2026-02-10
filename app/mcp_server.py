@@ -25,18 +25,49 @@ def _result_to_payload(result: DomainCheckResult) -> dict[str, Any]:
 
 def _check_to_payload(domain: str) -> dict[str, Any]:
     logger.info("Processing domain: %s", domain)
+    print(f"[MCP] Processing domain: {domain}", flush=True)
     try:
         result = check_domain_registration(domain)
     except ValueError as exc:
         sanitized = domain.strip().lower()
-        return {
+        payload = {
             "domain": sanitized or domain,
             "registered": None,
             "status": "invalid",
             "error": str(exc),
         }
+        logger.info(
+            "Processed domain=%s status=%s registered=%s error=%s",
+            payload["domain"],
+            payload["status"],
+            payload["registered"],
+            payload["error"],
+        )
+        print(
+            f"[MCP] Processed domain={payload['domain']} "
+            f"status={payload['status']} "
+            f"registered={payload['registered']} "
+            f"error={payload['error']}",
+            flush=True,
+        )
+        return payload
 
-    return _result_to_payload(result)
+    payload = _result_to_payload(result)
+    logger.info(
+        "Processed domain=%s status=%s registered=%s error=%s",
+        payload["domain"],
+        payload["status"],
+        payload["registered"],
+        payload["error"],
+    )
+    print(
+        f"[MCP] Processed domain={payload['domain']} "
+        f"status={payload['status']} "
+        f"registered={payload['registered']} "
+        f"error={payload['error']}",
+        flush=True,
+    )
+    return payload
 
 
 def create_mcp_server(
@@ -74,6 +105,7 @@ def create_mcp_server(
         if len(domains) > 200:
             raise ValueError("`domains` supports up to 200 values")
         logger.info("Processing batch request with %d domains", len(domains))
+        print(f"[MCP] Processing batch request with {len(domains)} domains", flush=True)
         return {"results": [_check_to_payload(domain) for domain in domains]}
 
     return server
